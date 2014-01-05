@@ -1,0 +1,50 @@
+# histogram plots
+data = read.csv("data.csv")
+colnames <- dimnames(data)[[2]]
+par(mfrow=c(3, 3))
+for (i in 2:6) { 
+  hist(data[,i], main=colnames[i]) 
+  d <- density(data[,i])
+  lines(d, col="red")
+}
+
+# correlations
+hoehe <- data[,2]
+umfang <- data[,3]
+schwierigkeit <- data[,4]
+wandhoehe <- data[,5]
+erstbesteigung <- data[,6]
+matrix <- cbind(hoehe, umfang, schwierigkeit, wandhoehe, erstbesteigung)
+cor(matrix, use="complete")
+
+install.packages("Hmisc")
+library(Hmisc)
+rcorr(matrix)
+               hoehe umfang schwierigkeit wandhoehe erstbesteigung
+hoehe           1.00  -0.09          0.33      0.68           0.59
+umfang         -0.09   1.00         -0.33     -0.29          -0.10
+schwierigkeit   0.33  -0.33          1.00      0.54           0.67
+wandhoehe       0.68  -0.29          0.54      1.00           0.48
+erstbesteigung  0.59  -0.10          0.67      0.48           1.00
+
+n= 32 
+
+
+P
+               hoehe  umfang schwierigkeit wandhoehe erstbesteigung
+hoehe                 0.6116 0.0685        0.0000    0.0004        
+umfang         0.6116        0.0673        0.1127    0.5698        
+schwierigkeit  0.0685 0.0673               0.0013    0.0000        
+wandhoehe      0.0000 0.1127 0.0013                  0.0053        
+erstbesteigung 0.0004 0.5698 0.0000        0.0053
+
+# summary statistics
+summary(data)
+                 Berg        Hoehe      Bergfussumfang   Schwierigkeit     Wandhoehe    Erstbesteigung
+ Aconcagua         : 1   Min.   :3406   Min.   : 21.00   Min.   :1.000   Min.   :   0   Min.   :1786  
+ Ama Dablam        : 1   1st Qu.:4764   1st Qu.: 39.12   1st Qu.:2.000   1st Qu.:1000   1st Qu.:1874  
+ Annapurna         : 1   Median :6076   Median : 60.00   Median :3.250   Median :1900   Median :1934  
+ Aoraki            : 1   Mean   :6216   Mean   : 73.05   Mean   :3.375   Mean   :1954   Mean   :1912  
+ Aratat            : 1   3rd Qu.:8052   3rd Qu.: 89.25   3rd Qu.:4.250   3rd Qu.:3100   3rd Qu.:1954  
+ Carstensz-Pyramide: 1   Max.   :8850   Max.   :310.00   Max.   :7.250   Max.   :4500   Max.   :1966  
+ (Other)           :26      
