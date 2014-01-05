@@ -1,0 +1,32 @@
+<html ng-app="toptrumps">
+<html>
+<head>
+    <title>top trumps</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+    <script src="script.js"></script>
+
+    <!--<link href='http://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Tangerine' rel='stylesheet' type='text/css'>-->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body ng-controller="MainCtl">
+<div id="player-container">
+    <div id="playerA" class="player">
+        <div class="player-drop">{{playerA.name}}</div>
+        <div class="player-stats">
+            wins: {{playerA.wins}}, losses: {{playerA.losses}}
+        </div>
+    </div>
+    <div id="playerB" class="player">
+        <div class="player-drop">{{playerB.name}}</div>
+        <div class="player-stats">
+            wins: {{playerB.wins}}, losses: {{playerB.losses}}
+        </div>
+    </div>
+</div>
+<div id="player-controls">
+    <button id="button-play">{{button.text}}</button>
+</div>
+</body>
+</html>
