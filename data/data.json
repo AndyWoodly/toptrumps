@@ -6,7 +6,7 @@
         "Wandhoehe [m]",
         "Erstbesteigung [Jahr]"
     ],
-    "data": [
+    "cards": [
         {
             "name": "Matterhorn",
             "values": [

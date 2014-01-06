@@ -13,20 +13,22 @@
 <body ng-controller="MainCtl">
 <div id="player-container">
     <div id="playerA" class="player">
-        <div class="player-drop">{{playerA.name}}</div>
+        {{playerA.name}}
+        <drop-zone id="'playerA'"></drop-zone>
         <div class="player-stats">
             wins: {{playerA.wins}}, losses: {{playerA.losses}}
         </div>
     </div>
     <div id="playerB" class="player">
-        <div class="player-drop">{{playerB.name}}</div>
+        {{playerB.name}}
+        <drop-zone id="'playerB'"></drop-zone>
         <div class="player-stats">
             wins: {{playerB.wins}}, losses: {{playerB.losses}}
         </div>
     </div>
 </div>
 <div id="player-controls">
-    <button id="button-play">{{button.text}}</button>
+    <button id="button-play" ng-click="play()" ng-disabled="!canPlay">{{button.text}}</button>
 </div>
 </body>
 </html>
