@@ -13,7 +13,10 @@
             }
             var nrOfValues = myCard.values.length;
             var idx = Math.floor(Math.random() * nrOfValues);
-            return { idx: idx, value: myCard.values[idx] };
+            return {
+                idx: idx,
+                value: myCard.values[idx]
+            };
         },
 
         cardWon: function(myCard, otherCard) {

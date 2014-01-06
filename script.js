@@ -1,6 +1,21 @@
 angular.module('toptrumps', [])
 
-.controller('MainCtl', ['$scope', '$http', function($scope, $http) {
+.factory('utils', function() {
+    return {
+        shuffle: function(arry) {
+                var i, temp, j, len = arry.length;
+                for (i = 0; i < len; i++) {
+                    j = ~~(Math.random() * (i + 1));
+                    temp = arry[i];
+                    arry[i] = arry[j];
+                    arry[j] = temp;
+                }
+                return arry;
+            }
+    }
+})
+
+.controller('MainCtl', ['$scope', '$http', 'utils', function($scope, $http, Utils) {
 
     $scope.button = {
         text: "Play"
@@ -18,11 +33,52 @@ angular.module('toptrumps', [])
         losses: 0
     };
 
-    $scope.play = function() {
-        alert("play");
+    var dealCards = function(cards) {
+        var result = [[],[]];
+        for (var i = 0; i < cards.length; i++) {
+            result[i%2].push(cards[i]);
+        }
+        return result;
     };
 
-    $scope.canPlay = true;
+    $scope.play = function() {
+        $scope.canPlay = false;
+        // play a single game
+        Utils.shuffle($scope.data.cards);
+
+        var game = dealCards($scope.data.cards);
+        var players = [$scope.playerA, $scope.playerB];
+
+        var currPlayerIdx = 0;
+        var turns = 0;
+        while (game[0].length > 0 && game[1].length > 0) {
+            var otherPlayerIdx = (currPlayerIdx+1)%2;
+            var currPlayerCard = game[currPlayerIdx][0];
+            var otherPlayerCard = game[otherPlayerIdx][0];
+            var question = players[currPlayerIdx].ask(currPlayerCard);
+            var winner = currPlayerIdx;
+            var looser = otherPlayerIdx;
+            if (otherPlayerCard.values[question.idx] > question.value) {
+                // current player lost
+                winner = otherPlayerIdx;
+                looser = currPlayerIdx;
+            }
+            var winningCard = game[winner].shift();
+            var loosingCard = game[looser].shift();
+            players[winner].cardWon(winningCard, loosingCard);
+            players[looser].cardLost(loosingCard, winningCard);
+            game[winner].push(loosingCard);
+            game[winner].push(winningCard); // TODO define order
+
+            currPlayerIdx = winner;
+            turns++;
+        }
+
+        alert("player "+currPlayerIdx+ " won!");
+        $scope.canPlay = true;
+    };
+
+    $scope.canPlay = false;
 
     function init() {
         $http.get("data/data.json")
@@ -30,6 +86,7 @@ angular.module('toptrumps', [])
                 $scope.data = data;
                 if (angular.isDefined(data)) {
                     console.log("got card data");
+                    $scope.canPlay = true;
                 }
             })
             .error(function(data, status) {
