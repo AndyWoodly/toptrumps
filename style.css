@@ -30,13 +30,32 @@ html, body {
 
     margin: 3em;
 }
+.player-label {
+    font-size: 20px;
+    color: darkgray;
+    margin-bottom: 0.5em;
+}
 .player-drop {
-    height: 100%;
+    height: 150px;
+
+    display: box;
+    display: -webkit-box;
+    box-orient: vertical;
+    -webkit-box-orient: vertical;
+    box-pack: center;
+    -webkit-box-pack: center;
+    box-align: center;
+    -webkit-box-align: center;
 
     border: 5px dashed gray;
     border-radius: 10px;
     padding: 5px;
     background: #eeeeee;
+}
+.drop-text {
+    box-flex: 1;
+    font-size: 30px;
+    color: lightgrey;
 }
 .drag-over {
     /*border: 5px solid darkgray;*/
@@ -47,14 +66,29 @@ html, body {
     margin-top: 1em;
 }
 #player-controls {
+    margin-top: 20px;
     text-align: center;
+    height: 30px;
 }
-#button-play {
+
+.ctl-elem {
+    height: 30px;
+    border-radius: 10px;
+    background-color: lightgrey;
+    margin-right: 10px;
+    padding: 10px;
+}
+
+.cbx {
+    width: 1em;
+    height: 1em;
+}
+
+.button-play {
     display: inline-block;
     width: 100px;
-    height: 30px;
+    height: 39px;
 
-    border-radius: 5px;
-    color: #525252;
+    border-radius: 10px;
 }
 

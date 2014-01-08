@@ -18,31 +18,49 @@ angular.module('toptrumps', [])
 .controller('MainCtl', ['$scope', '$http', 'utils', function($scope, $http, Utils) {
 
     $scope.button = {
-        text: "Play"
+        text: "Battle!"
     };
 
     $scope.playerA = {
-        name: "Player A",
+        name: "drop here",
+        valid: false,
         wins: 0,
         losses: 0
     };
 
     $scope.playerB = {
-        name: "Player B",
+        name: "drop here",
+        valid: false,
         wins: 0,
         losses: 0
     };
 
-    var dealCards = function(cards) {
+    $scope.nrOfGames = 100;
+
+    $scope.isRunning = false;
+
+    $scope.canPlay = function() {
+        return $scope.playerA.valid
+                && $scope.playerB.valid
+                && !$scope.isRunning;
+    };
+
+    function resetPlayerStats() {
+        $scope.playerA.wins = 0;
+        $scope.playerA.losses = 0;
+        $scope.playerB.wins = 0;
+        $scope.playerB.losses = 0;
+    }
+
+    function dealCards(cards) {
         var result = [[],[]];
         for (var i = 0; i < cards.length; i++) {
             result[i%2].push(cards[i]);
         }
         return result;
-    };
+    }
 
-    $scope.play = function() {
-        $scope.canPlay = false;
+    function playGame() {
         // play a single game
         Utils.shuffle($scope.data.cards);
 
@@ -51,13 +69,14 @@ angular.module('toptrumps', [])
 
         var currPlayerIdx = 0;
         var turns = 0;
+        var winner, looser;
         while (game[0].length > 0 && game[1].length > 0) {
             var otherPlayerIdx = (currPlayerIdx+1)%2;
             var currPlayerCard = game[currPlayerIdx][0];
             var otherPlayerCard = game[otherPlayerIdx][0];
             var question = players[currPlayerIdx].ask(currPlayerCard);
-            var winner = currPlayerIdx;
-            var looser = otherPlayerIdx;
+            winner = currPlayerIdx;
+            looser = otherPlayerIdx;
             if (otherPlayerCard.values[question.idx] > question.value) {
                 // current player lost
                 winner = otherPlayerIdx;
@@ -74,11 +93,21 @@ angular.module('toptrumps', [])
             turns++;
         }
 
-        alert("player "+currPlayerIdx+ " won!");
-        $scope.canPlay = true;
-    };
+        players[winner].wins++;
+        players[looser].losses++;
+    }
 
-    $scope.canPlay = false;
+    $scope.play = function() {
+        $scope.isRunning = true;
+
+        resetPlayerStats();
+
+        for (var i = 0; i < $scope.nrOfGames; i++) {
+            playGame();
+        }
+
+        $scope.isRunning = false;
+    };
 
     function init() {
         $http.get("data/data.json")
@@ -86,8 +115,7 @@ angular.module('toptrumps', [])
                 $scope.data = data;
                 if (angular.isDefined(data)) {
                     console.log("got card data");
-                    $scope.canPlay = true;
-                }
+                    }
             })
             .error(function(data, status) {
                 alert("Failed to load card data, "+status);
@@ -96,8 +124,7 @@ angular.module('toptrumps', [])
 
     init();
 
-    $scope.$on("filedrop", function(event, data) {
-        console.log("loading player", data.id);
+    $scope.$on("playerdrop", function(event, data) {
         var r = new FileReader();
         r.onload = function(e) {
             var source = e.target.result;
@@ -105,8 +132,14 @@ angular.module('toptrumps', [])
                 var player = eval(source);
                 player.wins = 0;
                 player.losses = 0;
-                $scope[data.id] = player;
-                $scope.$apply();
+                // TODO verify player
+                player.valid = true;
+                for (var attr in player) {
+                    if (player.hasOwnProperty(attr)) {
+                        data.player[attr] = player[attr];
+                    }
+                }
+                $scope.$digest();
             } catch (e) {
                 alert("Failed to parse player source.");
                 console.log(e);
@@ -121,15 +154,21 @@ angular.module('toptrumps', [])
 
 }])
 
-.directive('dropZone', function() {
+.directive('playerDropZone', function() {
     return {
         restrict: 'E',
         templateUrl: 'dropzone.tpl.html',
+        transclude: true,
         scope: {
-            id: '='
+            player: '='
         },
         link: function(scope, el, attrs, controller) {
             var id = scope.id;
+//            scope.zonetext = "drop here";
+            if (!angular.isDefined(scope.player)) {
+                scope.player = { name: "drop here" };
+            }
+
 
             el.bind("dragover", function(e) {
                 if (e.preventDefault) {
@@ -151,17 +190,20 @@ angular.module('toptrumps', [])
             el.bind("drop", function(e) {
                 angular.element(e.target).removeClass('drag-over');
                 if (e.preventDefault) {
-                    e.preventDefault(); // Necessary. Allows us to drop.
+                    e.preventDefault();
                 }
 
                 if (e.stopPropogation) {
-                    e.stopPropogation(); // Necessary. Allows us to drop.
+                    e.stopPropogation();
                 }
 
                 var dt = e.dataTransfer;
                 var files = dt.files;
 
-                scope.$emit("filedrop", { id: id, file: files[0] });
+                scope.$emit("playerdrop", {
+                    player: scope.player,
+                    file: files[0]
+                });
                 return false;
             });
 

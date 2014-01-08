@@ -1,34 +1,41 @@
 <html ng-app="toptrumps">
 <html>
 <head>
-    <title>top trumps</title>
+    <title>Top Trumps Arena</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
     <script src="script.js"></script>
 
-    <!--<link href='http://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Tangerine' rel='stylesheet' type='text/css'>-->
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body ng-controller="MainCtl">
 <div id="player-container">
     <div id="playerA" class="player">
-        {{playerA.name}}
-        <drop-zone id="'playerA'"></drop-zone>
+        <div class="player-label">Player A</div>
+        <player-drop-zone player="playerA"></player-drop-zone>
         <div class="player-stats">
             wins: {{playerA.wins}}, losses: {{playerA.losses}}
         </div>
     </div>
     <div id="playerB" class="player">
-        {{playerB.name}}
-        <drop-zone id="'playerB'"></drop-zone>
+        <div class="player-label">Player B</div>
+        <player-drop-zone player="playerB"></player-drop-zone>
         <div class="player-stats">
             wins: {{playerB.wins}}, losses: {{playerB.losses}}
         </div>
     </div>
 </div>
 <div id="player-controls">
-    <button id="button-play" ng-click="play()" ng-disabled="!canPlay">{{button.text}}</button>
+    <span class="ctl-elem">
+        # of games
+        <input id="nrOfGames" ng-model="nrOfGames" type="text" size="3" onClick="this.select();"/>
+    </span>
+    <span class="ctl-elem">
+        log turns
+        <input id="logTurns" class="cbx" ng-model="logTurns" type="checkbox"/>
+    </span>
+    <button class="button-play" ng-click="play()" ng-disabled="!canPlay()">{{button.text}}</button>
 </div>
 </body>
 </html>
