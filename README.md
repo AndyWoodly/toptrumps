@@ -3,6 +3,10 @@ toptrumps
 
 [Top Trumps](http://en.wikipedia.org/wiki/Top_Trumps) is the well known card game we used to play in our childhood. This project is a playground for development of the perfect top trumps computer player. 
 
+deployed version
+----------------
+http://andywoodly.github.io/toptrumps
+
 computer player
 ===============
 
