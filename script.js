@@ -15,7 +15,7 @@ angular.module('toptrumps', [])
     }
 })
 
-.controller('MainCtl', ['$scope', '$http', 'utils', function($scope, $http, Utils) {
+.controller('MainCtl', ['$scope', '$http', '$log', 'utils', function($scope, $http, log, Utils) {
 
     $scope.button = {
         text: "Battle!"
@@ -60,6 +60,10 @@ angular.module('toptrumps', [])
         return result;
     }
 
+    function toString(card, index) {
+        return card.name + " " + card.values[index];
+    }
+
     function playGame() {
         // play a single game
         Utils.shuffle($scope.data.cards);
@@ -89,12 +93,23 @@ angular.module('toptrumps', [])
             game[winner].push(loosingCard);
             game[winner].push(winningCard); // TODO define order
 
+            if ($scope.logTurns) {
+                var winnnerText = (winner == 0 ? "A" : "B") + " " + $scope.data.legend[question.idx] + ": ";
+                var wonFmt = toString(winningCard, question.idx);
+                var lostFmt = toString(loosingCard, question.idx);
+                log.log(winnnerText + wonFmt+" > "+ lostFmt);
+            }
+
             currPlayerIdx = winner;
             turns++;
         }
 
         players[winner].wins++;
         players[looser].losses++;
+
+        if ($scope.logTurns) {
+            log.log("### Victory "+players[winner].wins+": player "+(winner == 0 ? "A" : "B")+" ("+players[winner].name+") - "+turns+ " turns");
+        }
     }
 
     $scope.play = function() {
@@ -114,8 +129,8 @@ angular.module('toptrumps', [])
             .success(function(data) {
                 $scope.data = data;
                 if (angular.isDefined(data)) {
-                    console.log("got card data");
-                    }
+                    log.log("got card data");
+                }
             })
             .error(function(data, status) {
                 alert("Failed to load card data, "+status);
@@ -142,12 +157,12 @@ angular.module('toptrumps', [])
                 $scope.$digest();
             } catch (e) {
                 alert("Failed to parse player source.");
-                console.log(e);
+                log.log(e);
             }
         };
         r.onerror = function(error) {
             alert("Failed to load dropped file.");
-            console.log(error);
+            log.log(error);
         };
         r.readAsText(data.file);
     });
@@ -163,18 +178,10 @@ angular.module('toptrumps', [])
             player: '='
         },
         link: function(scope, el, attrs, controller) {
-            var id = scope.id;
-//            scope.zonetext = "drop here";
-            if (!angular.isDefined(scope.player)) {
-                scope.player = { name: "drop here" };
-            }
-
-
             el.bind("dragover", function(e) {
                 if (e.preventDefault) {
                     e.preventDefault();
                 }
-
                 e.dataTransfer.dropEffect = 'move';
                 return false;
             });
