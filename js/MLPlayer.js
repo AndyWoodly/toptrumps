@@ -16,7 +16,6 @@
             for (v in values) {
                 values[v].sort();
             }
-            console.log(values);
             // create value to rank index
             this.ranks = {};
             for (i in values) {
@@ -29,7 +28,6 @@
                     this.ranks[i][val] = rank;
                 }
             }
-            console.log(this.ranks);
         },
 
         ask: function(myCard) {

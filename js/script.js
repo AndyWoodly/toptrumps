@@ -15,7 +15,7 @@ angular.module('toptrumps', [])
     }
 })
 
-.factory('GameService', ['utils', function(Utils) {
+.factory('GameService', function() {
     function dealCards(cards) {
         var result = [[],[]];
         for (var i = 0; i < cards.length; i++) {
@@ -109,7 +109,7 @@ angular.module('toptrumps', [])
         }
 
     }
-}])
+})
 
 .controller('MainCtl', ['$scope', '$http', '$log', 'utils', 'GameService',
             function($scope, $http, log, Utils, GameService) {
@@ -155,7 +155,7 @@ angular.module('toptrumps', [])
 
         resetPlayerStats();
 
-        var gameTracker = GameService.createGameTracker(log, $scope.logTurns, true);
+        var gameTracker = GameService.createGameTracker(log, $scope.logTurns, $scope.logWins);
 
         for (var i = 0; i < $scope.nrOfGames; i++) {
             Utils.shuffle($scope.data.cards);
