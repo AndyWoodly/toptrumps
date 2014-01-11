@@ -17,24 +17,24 @@ computer players must stick to the following implementation detail (see simplePl
     var player = {
         name: "A descriptive player name ",
 
-        init: function(completeCardData) {
-            // perform card analysis here
+        init: function(cardData) {
+            // perform any card analysis here
         },
 
         ask: function(myCard) {
-            // give your card, make a category selection here, return selected index and value
+            // based your current card, make a category selection and return selected index and value
             return {
                 idx: theCategoryIndex,
-                value: theCardValue
+                value: theCategoryCardValue
             };
         },
 
         cardWon: function(myCard, otherCard) {
-            // callback if you won a card
+            // callback if you won a card (otherCard)
         },
 
         cardLost: function(myCard, otherCard) {
-            // callback if you lost a card
+            // callback if you lost a card (myCard)
         }
     };
     return player;
