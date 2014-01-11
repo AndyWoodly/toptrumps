@@ -2,20 +2,117 @@ angular.module('toptrumps', [])
 
 .factory('utils', function() {
     return {
-        shuffle: function(arry) {
-                var i, temp, j, len = arry.length;
-                for (i = 0; i < len; i++) {
-                    j = ~~(Math.random() * (i + 1));
-                    temp = arry[i];
-                    arry[i] = arry[j];
-                    arry[j] = temp;
-                }
-                return arry;
+        shuffle: function(array) {
+            var i, temp, j, len = array.length;
+            for (i = 0; i < len; i++) {
+                j = ~~(Math.random() * (i + 1));
+                temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
             }
+            return array;
+        }
     }
 })
 
-.controller('MainCtl', ['$scope', '$http', '$log', 'utils', function($scope, $http, log, Utils) {
+.factory('GameService', ['utils', function(Utils) {
+    function dealCards(cards) {
+        var result = [[],[]];
+        for (var i = 0; i < cards.length; i++) {
+            result[i%2].push(cards[i]);
+        }
+        return result;
+    }
+
+    function Game(cardData, playerA, playerB, gameTracker) {
+        this.cardData = cardData;
+        this.players = [playerA, playerB];
+        this.gameTracker = gameTracker;
+        this.nrOfIterations = 100;
+
+        this.setIterations = function(nrOfIterations) {
+            this.nrOfIterations = nrOfIterations;
+        };
+
+        this.play = function() {
+            this.players[0].init(this.cardData);
+            this.players[1].init(this.cardData);
+            var game = dealCards(this.cardData.cards);
+
+            var currPlayerIdx = 0;
+            var nrOfTurns = 0;
+            var winnerIdx, looserIdx;
+            while (game[0].length > 0 && game[1].length > 0) {
+                var otherPlayerIdx = (currPlayerIdx+1)%2;
+                var currPlayerCard = game[currPlayerIdx][0];
+                var otherPlayerCard = game[otherPlayerIdx][0];
+                var question = this.players[currPlayerIdx].ask(currPlayerCard);
+                winnerIdx = currPlayerIdx;
+                looserIdx = otherPlayerIdx;
+                if (otherPlayerCard.values[question.idx] > question.value) {
+                    // current player lost
+                    winnerIdx = otherPlayerIdx;
+                    looserIdx = currPlayerIdx;
+                }
+                var winningCard = game[winnerIdx].shift();
+                var loosingCard = game[looserIdx].shift();
+                this.players[winnerIdx].cardWon(winningCard, loosingCard);
+                this.players[looserIdx].cardLost(loosingCard, winningCard);
+
+                // TODO define order how won cards are queued
+                game[winnerIdx].push(loosingCard);
+                game[winnerIdx].push(winningCard);
+
+                if (gameTracker) {
+                    gameTracker.onTurn(winnerIdx, winningCard, loosingCard, question.idx, this.cardData.legend[question.idx]);
+                }
+
+                currPlayerIdx = winnerIdx;
+                nrOfTurns++;
+            }
+
+            this.players[winnerIdx].wins++;
+            this.players[looserIdx].losses++;
+
+            if (gameTracker) {
+                gameTracker.onWin(winnerIdx, this.players[winnerIdx], nrOfTurns);
+            }
+        }
+    }
+
+    return {
+
+        createGameTracker: function(log, logTurns, logWins) {
+            function toString(card, index) {
+                return card.name + " " + card.values[index];
+            }
+
+            return {
+                onTurn: function(winnerIdx, winningCard, loosingCard, questionIdx, categoryText) {
+                    if (logTurns) {
+                        var winnnerText = (winnerIdx == 0 ? "A" : "B") + " " + categoryText + ": ";
+                        var wonFmt = toString(winningCard, questionIdx);
+                        var lostFmt = toString(loosingCard, questionIdx);
+                        log.log(winnnerText + wonFmt+" > "+ lostFmt);
+                    }
+                },
+                onWin: function(winnerIdx, winner, turns) {
+                    if (logWins) {
+                        log.log("### Victory "+winner.wins+": player "+(winnerIdx == 0 ? "A" : "B")+" ("+winner.name+") - "+turns+ " turns");
+                    }
+                }
+            };
+        },
+
+        createGame: function(cardData, playerA, playerB, gameTracker) {
+            return new Game(cardData, playerA, playerB, gameTracker);
+        }
+
+    }
+}])
+
+.controller('MainCtl', ['$scope', '$http', '$log', 'utils', 'GameService',
+            function($scope, $http, log, Utils, GameService) {
 
     $scope.button = {
         text: "Battle!"
@@ -52,73 +149,19 @@ angular.module('toptrumps', [])
         $scope.playerB.losses = 0;
     }
 
-    function dealCards(cards) {
-        var result = [[],[]];
-        for (var i = 0; i < cards.length; i++) {
-            result[i%2].push(cards[i]);
-        }
-        return result;
-    }
-
-    function toString(card, index) {
-        return card.name + " " + card.values[index];
-    }
-
-    function playGame() {
-        // play a single game
-        Utils.shuffle($scope.data.cards);
-
-        var game = dealCards($scope.data.cards);
-        var players = [$scope.playerA, $scope.playerB];
-
-        var currPlayerIdx = 0;
-        var turns = 0;
-        var winner, looser;
-        while (game[0].length > 0 && game[1].length > 0) {
-            var otherPlayerIdx = (currPlayerIdx+1)%2;
-            var currPlayerCard = game[currPlayerIdx][0];
-            var otherPlayerCard = game[otherPlayerIdx][0];
-            var question = players[currPlayerIdx].ask(currPlayerCard);
-            winner = currPlayerIdx;
-            looser = otherPlayerIdx;
-            if (otherPlayerCard.values[question.idx] > question.value) {
-                // current player lost
-                winner = otherPlayerIdx;
-                looser = currPlayerIdx;
-            }
-            var winningCard = game[winner].shift();
-            var loosingCard = game[looser].shift();
-            players[winner].cardWon(winningCard, loosingCard);
-            players[looser].cardLost(loosingCard, winningCard);
-            game[winner].push(loosingCard);
-            game[winner].push(winningCard); // TODO define order
-
-            if ($scope.logTurns) {
-                var winnnerText = (winner == 0 ? "A" : "B") + " " + $scope.data.legend[question.idx] + ": ";
-                var wonFmt = toString(winningCard, question.idx);
-                var lostFmt = toString(loosingCard, question.idx);
-                log.log(winnnerText + wonFmt+" > "+ lostFmt);
-            }
-
-            currPlayerIdx = winner;
-            turns++;
-        }
-
-        players[winner].wins++;
-        players[looser].losses++;
-
-        if ($scope.logTurns) {
-            log.log("### Victory "+players[winner].wins+": player "+(winner == 0 ? "A" : "B")+" ("+players[winner].name+") - "+turns+ " turns");
-        }
-    }
 
     $scope.play = function() {
         $scope.isRunning = true;
 
         resetPlayerStats();
 
+        var gameTracker = GameService.createGameTracker(log, $scope.logTurns, true);
+
         for (var i = 0; i < $scope.nrOfGames; i++) {
-            playGame();
+            Utils.shuffle($scope.data.cards);
+            var game = GameService.createGame($scope.data, $scope.playerA, $scope.playerB, gameTracker);
+            game.setIterations($scope.nrOfGames);
+            game.play();
         }
 
         $scope.isRunning = false;

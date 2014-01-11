@@ -4,7 +4,7 @@ toptrumps
 [Top Trumps](http://en.wikipedia.org/wiki/Top_Trumps) is the well known card game we used to play in our childhood. This project is a playground for development of the perfect top trumps computer player. 
 
 computer player
-===============
+---------------
 
 computer players must stick to the following implementation detail (see simplePlayer.js as a sample implementation):
 
@@ -36,3 +36,14 @@ computer players must stick to the following implementation detail (see simplePl
     return player;
 })();
 ```
+
+test setup
+----------
+
+Install karma
+
+ sudo npm install -g karma
+
+Start karma
+
+ karma start

@@ -48,3 +48,10 @@ summary(data)
  Aratat            : 1   3rd Qu.:8052   3rd Qu.: 89.25   3rd Qu.:4.250   3rd Qu.:3100   3rd Qu.:1954  
  Carstensz-Pyramide: 1   Max.   :8850   Max.   :310.00   Max.   :7.250   Max.   :4500   Max.   :1966  
  (Other)           :26      
+
+# scatterplot
+plot(data$Hoehe, data$Wandhoehe, xlim=c(0,9000), ylim=c(0,5000))
+scatter.smooth(data$Hoehe, data$Wandhoehe, xlim=c(0,9000), ylim=c(0,5000))
+
+# scatterplot matrix
+pairs(data[2:6], panel=panel.smooth)
