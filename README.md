@@ -46,8 +46,12 @@ test setup
 
 Install karma
 
- sudo npm install -g karma
+```
+sudo npm install -g karma
+```
 
 Start karma
 
- karma start
+```
+karma start
+``
